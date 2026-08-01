@@ -105,12 +105,12 @@ function createCard(animal, index) {
   button.dataset.index = String(index);
   button.setAttribute("aria-label", "Hidden animal card");
   button.innerHTML = `
-    <span class="card-inner">
-      <span class="card-face card-back" aria-hidden="true"></span>
-      <span class="card-face card-front">
+    <div class="card-inner">
+      <div class="card-face card-back" aria-hidden="true"></div>
+      <div class="card-face card-front">
         <img src="assets/animals/${animal}.png" alt="${animal}" draggable="false" />
-      </span>
-    </span>
+      </div>
+    </div>
   `;
   button.addEventListener("click", () => onCardClick(button));
   return button;

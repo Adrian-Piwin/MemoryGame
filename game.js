@@ -1,4 +1,4 @@
-const VERSION = "1.3.0";
+const VERSION = "1.3.1";
 
 const ANIMALS = [
   "bear",
@@ -422,6 +422,8 @@ function gapFor(cols, rows, availableW, availableH) {
   return Math.max(4, Math.min(10, Math.round(Math.min(availableW / cols, availableH / rows) * 0.04)));
 }
 
+const MIN_ROWS = 3;
+
 /** Prefer max square size; break ties with grids that match the shell aspect. */
 function bestGrid(total, availableW, availableH) {
   const shellAspect = availableW / Math.max(availableH, 1);
@@ -429,6 +431,9 @@ function bestGrid(total, availableW, availableH) {
 
   evenFactors(total).forEach((cols) => {
     const rows = total / cols;
+    // Always keep at least 3 rows so the board never becomes a short strip
+    if (rows < MIN_ROWS) return;
+
     const gap = gapFor(cols, rows, availableW, availableH);
     const size = Math.min(
       (availableW - gap * (cols - 1)) / cols,
@@ -447,10 +452,15 @@ function bestGrid(total, availableW, availableH) {
 
   if (best) return best;
 
-  const fallbackCols = MODES[selectedMode].cols;
+  // Fallback: widest even grid that still has >= 3 rows
+  const fallbackCols =
+    evenFactors(total)
+      .filter((cols) => total / cols >= MIN_ROWS)
+      .sort((a, b) => b - a)[0] || Math.ceil(total / MIN_ROWS);
+
   return {
     cols: fallbackCols,
-    rows: Math.ceil(total / fallbackCols),
+    rows: total / fallbackCols,
     gap: 6,
     size: 40,
     score: 0,

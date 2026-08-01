@@ -1,8 +1,9 @@
 # Animal Match
 
-Version `1.4.0`
+Version `1.5.1`
 
 A browser memory game with swappable card themes: Kenney animals and Pokémon sprites.
+Cheerful looping background music plays on the menu and during games (toggle with Sound on/off).
 
 ## Play
 
@@ -29,7 +30,8 @@ Choose a theme from the main menu dropdown:
 
 - Animal sprites from **Kenney.nl** — Animal Pack Redux, CC0 / public domain. See `assets/LICENSE-Kenney.txt`.
 - Pokémon artwork from **PokéAPI/sprites**. Pokémon is a trademark of Nintendo / Game Freak / Creatures. See `assets/LICENSE-Pokemon.txt`.
+- Music: **Children’s March Theme** by [Cleyton Kauffman](https://soundcloud.com/cleytonkauffman) (CC0). See `assets/music/LICENSE.txt`.
 
 ## License
 
-Game code: MIT. Animal assets remain CC0 (Kenney). Pokémon sprites remain copyright of their respective owners.
+Game code: MIT. Animal assets and music remain CC0. Pokémon sprites remain copyright of their respective owners.

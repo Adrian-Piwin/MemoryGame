@@ -1,4 +1,4 @@
-const VERSION = "1.4.0";
+const VERSION = "1.5.1";
 
 const THEMES = {
   animals: {
@@ -150,7 +150,10 @@ let lockedGrid = null; // keep cols/rows stable for the whole round
 let seconds = 0;
 let started = false;
 
-/* ---------------- Sounds (Web Audio — no asset files) ---------------- */
+/* ---------------- Sounds (Web Audio SFX + looping BGM) ---------------- */
+
+const MUSIC_MENU_VOLUME = 0.2;
+const MUSIC_PLAY_VOLUME = 0.32;
 
 const sfx = {
   ctx: null,
@@ -214,6 +217,56 @@ const sfx = {
   },
 };
 
+const music = {
+  audio: null,
+  scene: "menu", // menu | play
+
+  ensure() {
+    if (this.audio) return this.audio;
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = "auto";
+    // OGG loops more cleanly; MP3 covers Safari / older browsers
+    const canOgg =
+      audio.canPlayType('audio/ogg; codecs="opus"') || audio.canPlayType("audio/ogg");
+    audio.src = canOgg ? "assets/music/kids-loop.ogg" : "assets/music/kids-loop.mp3";
+    this.audio = audio;
+    this.applyVolume();
+    return audio;
+  },
+
+  applyVolume() {
+    if (!this.audio) return;
+    this.audio.volume = this.scene === "play" ? MUSIC_PLAY_VOLUME : MUSIC_MENU_VOLUME;
+  },
+
+  setScene(scene) {
+    this.scene = scene;
+    this.applyVolume();
+    this.sync();
+  },
+
+  play() {
+    if (sfx.muted) return;
+    const audio = this.ensure();
+    this.applyVolume();
+    const start = audio.play();
+    if (start) start.catch(() => {});
+  },
+
+  pause() {
+    this.audio?.pause();
+  },
+
+  sync() {
+    if (sfx.muted) {
+      this.pause();
+      return;
+    }
+    this.play();
+  },
+};
+
 function updateMuteButton() {
   const on = !sfx.muted;
   const label = on ? "Sound on" : "Sound off";
@@ -235,7 +288,10 @@ function toggleMute() {
   updateMuteButton();
   if (!sfx.muted) {
     sfx.unlock();
+    music.sync();
     sfx.flip();
+  } else {
+    music.pause();
   }
 }
 
@@ -474,6 +530,29 @@ function startTimer() {
   }, 1000);
 }
 
+/** Only primary press (left click / single finger). Ignores right/middle/pen barrel. */
+function isPrimaryPointer(event) {
+  if (!event.isPrimary) return false;
+  // Touch/pen: button is usually 0. Mouse: require left button only.
+  if (event.pointerType === "mouse" && event.button !== 0) return false;
+  if (event.button !== 0 && event.button !== -1) return false;
+  return true;
+}
+
+function bindCardInput(button) {
+  // pointerup feels snappier for kids and lets us filter button/pointer type
+  button.addEventListener("pointerup", (event) => {
+    if (!isPrimaryPointer(event)) return;
+    onCardClick(button);
+  });
+  // Keyboard still works via Enter/Space without relying on mouse click
+  button.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onCardClick(button);
+  });
+}
+
 function createCard(cardName, index) {
   const button = document.createElement("button");
   button.className = "card";
@@ -505,7 +584,7 @@ function createCard(cardName, index) {
   front.appendChild(img);
   inner.append(back, front);
   button.appendChild(inner);
-  button.addEventListener("click", () => onCardClick(button));
+  bindCardInput(button);
   return button;
 }
 
@@ -723,6 +802,7 @@ function showPlay() {
   playEl.classList.remove("is-hidden");
   winModal.classList.add("is-hidden");
   document.body.classList.add("is-playing");
+  music.setScene("play");
 }
 
 function showSetup() {
@@ -737,10 +817,12 @@ function showSetup() {
   previewBanner.classList.add("is-hidden");
   startBtn.disabled = false;
   startBtn.textContent = "Start game";
+  music.setScene("menu");
 }
 
 async function startGame() {
   sfx.unlock();
+  music.setScene("play");
   resetRoundState();
   startBtn.disabled = true;
   startBtn.textContent = "Loading…";
@@ -874,6 +956,31 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// Child-friendly: block right-click / long-press menus and middle-click
+document.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+document.addEventListener("auxclick", (event) => {
+  event.preventDefault();
+});
+// Stop Windows/touch long-press from selecting or dragging the board
+document.addEventListener(
+  "selectstart",
+  (event) => {
+    if (event.target.closest?.(".board, .card, .hud, .setup")) {
+      event.preventDefault();
+    }
+  },
+  { passive: false }
+);
+document.addEventListener(
+  "dragstart",
+  (event) => {
+    event.preventDefault();
+  },
+  { passive: false }
+);
+
 window.addEventListener("resize", () => scheduleFitBoard({ relock: true }), { passive: true });
 window.addEventListener("orientationchange", () => scheduleFitBoard({ relock: true }));
 if (window.visualViewport) {
@@ -894,14 +1001,16 @@ if (boardShell && typeof ResizeObserver !== "undefined") {
   shellObserver.observe(boardShell);
 }
 
-// Unlock audio on first tap anywhere (mobile autoplay policies)
+// Unlock audio + start BGM on first tap (mobile autoplay policies)
 document.addEventListener(
   "pointerdown",
   () => {
     sfx.unlock();
+    music.sync();
   },
   { once: true, passive: true }
 );
 
 updateMuteButton();
+music.ensure();
 confetti.ensure();

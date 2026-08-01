@@ -1,4 +1,9 @@
-const VERSION = "1.5.1";
+const VERSION = "1.6.1";
+
+// Block pinch-zoom on iOS Safari (viewport user-scalable is ignored there)
+for (const eventName of ["gesturestart", "gesturechange", "gestureend"]) {
+  document.addEventListener(eventName, (event) => event.preventDefault());
+}
 
 const THEMES = {
   animals: {
@@ -79,6 +84,30 @@ const THEMES = {
       "seel",
       "cubone",
       "chansey",
+    ],
+  },
+  princesses: {
+    id: "princesses",
+    label: "Disney Princesses",
+    brand: "Princess Match",
+    eyebrow: "Disneyclips Icons",
+    folder: "assets/princesses",
+    noun: "princess",
+    creditHtml:
+      'Icons by <a href="https://www.disneyclips.com/goodies/iconsprincesses.html" target="_blank" rel="noopener">Disneyclips.com</a> · not affiliated with Disney',
+    cards: [
+      "ariel",
+      "belle",
+      "aurora",
+      "cinderella",
+      "jasmine",
+      "mulan",
+      "pocahontas",
+      "rapunzel",
+      "tiana",
+      "elsa",
+      "anna",
+      "snow-white",
     ],
   },
 };

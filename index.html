@@ -2,11 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Animal Match — Memory Game</title>
     <meta
       name="description"
-      content="Flip cards and match pairs. Choose animals or Pokémon. Easy, medium, and hard modes."
+      content="Flip cards and match pairs. Choose animals, Pokémon, or princesses. Easy, medium, and hard modes."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=1.5.1" />
+    <link rel="stylesheet" href="styles.css?v=1.6.0" />
   </head>
   <body>
     <div class="sky" aria-hidden="true"></div>
@@ -48,6 +51,7 @@
           <select id="theme-select" aria-label="Card theme">
             <option value="animals">Animals</option>
             <option value="pokemon">Pokémon</option>
+            <option value="princesses">Disney Princesses</option>
           </select>
         </label>
         <div class="setup-actions">
@@ -99,7 +103,7 @@
       </div>
     </div>
 
-    <p class="version" id="version-label" aria-label="Version">v1.5.1</p>
+    <p class="version" id="version-label" aria-label="Version">v1.6.0</p>
     <footer class="credit" id="credit">
       Animals by
       <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener"
@@ -115,6 +119,6 @@
       by Cleyton Kauffman (CC0)
     </p>
 
-    <script src="game.js?v=1.5.1"></script>
+    <script src="game.js?v=1.6.0"></script>
   </body>
 </html>

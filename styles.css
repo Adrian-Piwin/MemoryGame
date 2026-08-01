@@ -30,11 +30,11 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Kid-friendly touch: no long-press callouts, accidental select, or double-tap zoom */
+  /* Kid-friendly touch: no long-press callouts, accidental select, or pinch/double-tap zoom */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
   overscroll-behavior: none;
 }
 
@@ -284,6 +284,35 @@ body[data-theme="pokemon"] .card.is-matched .card-front {
   border-color: var(--match);
 }
 
+body[data-theme="princesses"] {
+  --sky-top: #f0a8c8;
+  --sky-mid: #f7c4dc;
+  --meadow: #d48ab0;
+  --meadow-deep: #b86494;
+  --leaf: #8a3f6c;
+  --sunshine: #ffd76a;
+  --sun-deep: #e8b030;
+  --card-back: #c75b9b;
+  --card-back-edge: #8e3a6d;
+  --match: #ff9ec8;
+}
+
+body[data-theme="princesses"] .card-back {
+  background: linear-gradient(145deg, #e87bb8 0%, var(--card-back) 55%, var(--card-back-edge) 100%);
+}
+
+body[data-theme="princesses"] .card-back::after {
+  border: 2px solid rgba(255, 248, 231, 0.75);
+  background:
+    radial-gradient(circle at 50% 40%, #ffd76a 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 58%, rgba(255, 248, 231, 0.55) 0 34%, transparent 35%);
+}
+
+body[data-theme="princesses"] .card.is-matched .card-front {
+  background: #fff0f7;
+  border-color: var(--match);
+}
+
 .btn {
   appearance: none;
   border: none;
@@ -485,7 +514,7 @@ body[data-theme="pokemon"] .card.is-matched .card-front {
   cursor: pointer;
   perspective: 600px;
   contain: layout style;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;

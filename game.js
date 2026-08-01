@@ -40,6 +40,7 @@ const MODES = {
 const setupEl = document.getElementById("setup");
 const playEl = document.getElementById("play");
 const boardEl = document.getElementById("board");
+const boardShell = document.querySelector(".board-shell");
 const movesEl = document.getElementById("moves");
 const timerEl = document.getElementById("timer");
 const pairsEl = document.getElementById("pairs");
@@ -136,12 +137,51 @@ function createCard(animal, index) {
   return button;
 }
 
+function boardRows() {
+  const cols = Number(boardEl.dataset.cols) || MODES[selectedMode].cols;
+  return Math.ceil(deck.length / cols) || 1;
+}
+
+/** Scale square cards so the full grid always fits in the visible board shell. */
+function fitBoard() {
+  if (playEl.classList.contains("is-hidden") || !boardShell || deck.length === 0) {
+    return;
+  }
+
+  const cols = Number(boardEl.dataset.cols) || MODES[selectedMode].cols;
+  const rows = boardRows();
+  const availableW = boardShell.clientWidth;
+  const availableH = boardShell.clientHeight;
+
+  if (availableW < 16 || availableH < 16) return;
+
+  const gap = Math.max(3, Math.min(10, Math.floor(Math.min(availableW, availableH) * 0.018)));
+  const sizeByWidth = (availableW - gap * (cols - 1)) / cols;
+  const sizeByHeight = (availableH - gap * (rows - 1)) / rows;
+  const size = Math.max(36, Math.floor(Math.min(sizeByWidth, sizeByHeight)));
+
+  boardEl.style.setProperty("--cols", String(cols));
+  boardEl.style.setProperty("--rows", String(rows));
+  boardEl.style.setProperty("--board-gap", `${gap}px`);
+  boardEl.style.setProperty("--card-size", `${size}px`);
+}
+
+function scheduleFitBoard() {
+  requestAnimationFrame(() => {
+    fitBoard();
+    // Second pass after fonts/layout settle (banner show/hide, compact hero, etc.)
+    requestAnimationFrame(fitBoard);
+  });
+}
+
 function buildBoard() {
   const { pairs, cols } = MODES[selectedMode];
   const animals = pickAnimals(pairs);
   deck = shuffle([...animals, ...animals]);
   boardEl.innerHTML = "";
   boardEl.dataset.cols = String(cols);
+  boardEl.style.setProperty("--cols", String(cols));
+  boardEl.style.setProperty("--rows", String(Math.ceil((pairs * 2) / cols)));
   deck.forEach((animal, index) => {
     boardEl.appendChild(createCard(animal, index));
   });
@@ -168,6 +208,7 @@ function endPreview() {
   boardEl.classList.remove("is-previewing");
   previewBanner.classList.add("is-hidden");
   hideAllCards();
+  scheduleFitBoard();
 }
 
 function startPreview() {
@@ -181,6 +222,7 @@ function startPreview() {
   previewBanner.classList.remove("is-hidden");
   previewCount.textContent = String(remaining);
   revealAllCards();
+  scheduleFitBoard();
 
   previewIntervalId = setInterval(() => {
     remaining -= 1;
@@ -213,12 +255,14 @@ function showPlay() {
   setupEl.classList.add("is-hidden");
   playEl.classList.remove("is-hidden");
   winModal.classList.add("is-hidden");
+  document.body.classList.add("is-playing");
 }
 
 function showSetup() {
   playEl.classList.add("is-hidden");
   setupEl.classList.remove("is-hidden");
   winModal.classList.add("is-hidden");
+  document.body.classList.remove("is-playing");
   stopTimer();
   clearPreviewTimers();
   previewing = false;
@@ -231,6 +275,12 @@ function startGame() {
   buildBoard();
   showPlay();
   startPreview();
+}
+
+window.addEventListener("resize", scheduleFitBoard);
+window.addEventListener("orientationchange", scheduleFitBoard);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", scheduleFitBoard);
 }
 
 function onCardClick(card) {

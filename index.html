@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
     <div class="sky" aria-hidden="true"></div>
@@ -65,7 +65,9 @@
         <p class="preview-banner is-hidden" id="preview-banner" aria-live="polite">
           Memorize the animals… <span id="preview-count">0</span>s
         </p>
-        <div class="board" id="board" role="grid" aria-label="Memory board"></div>
+        <div class="board-shell">
+          <div class="board" id="board" role="grid" aria-label="Memory board"></div>
+        </div>
       </section>
     </main>
 
@@ -88,6 +90,6 @@
       (CC0)
     </footer>
 
-    <script src="game.js?v=4"></script>
+    <script src="game.js?v=5"></script>
   </body>
 </html>

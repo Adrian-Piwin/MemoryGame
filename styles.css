@@ -76,7 +76,7 @@ body {
   max-width: none;
   height: 100%;
   margin: 0 auto;
-  padding: 0.55rem clamp(0.55rem, 1.8vw, 1.25rem) 1.5rem;
+  padding: 0.45rem clamp(0.65rem, 2vw, 1.35rem) 1.35rem;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -325,8 +325,16 @@ body.is-playing .hero {
   font-size: 0.9rem;
 }
 
+.preview-slot {
+  flex-shrink: 0;
+  min-height: 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .preview-banner {
-  margin: 0 auto;
+  margin: 0;
   width: fit-content;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
@@ -335,12 +343,11 @@ body.is-playing .hero {
   font-size: 0.92rem;
   font-weight: 700;
   box-shadow: 0 3px 0 rgba(196, 137, 16, 0.45);
-  flex-shrink: 0;
-  animation: rise-in 0.3s ease both;
 }
 
 .preview-banner.is-hidden {
-  display: none;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .board-shell {
@@ -348,28 +355,32 @@ body.is-playing .hero {
   min-height: 0;
   min-width: 0;
   width: 100%;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  padding: 2px;
+  padding: 8px;
   box-sizing: border-box;
 }
 
 .board {
   --cols: 4;
   --rows: 4;
-  --board-gap: 0.5rem;
-  --card-size: 80px;
+  --board-gap: 6px;
+  --card-size: 72px;
+  --board-w: auto;
+  --board-h: auto;
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--card-size));
   grid-template-rows: repeat(var(--rows), var(--card-size));
   gap: var(--board-gap);
-  width: max-content;
+  width: var(--board-w);
+  height: var(--board-h);
   max-width: 100%;
   max-height: 100%;
-  margin: 0 auto;
-  perspective: 1000px;
-  overflow: visible;
+  margin: 0;
+  perspective: 800px;
+  box-sizing: border-box;
 }
 
 .board.is-previewing {
@@ -395,7 +406,7 @@ body.is-playing .hero {
   transform-style: preserve-3d;
   transition: transform 0.28s cubic-bezier(0.2, 0.75, 0.25, 1);
   border-radius: clamp(0.4rem, 12%, 0.9rem);
-  box-shadow: 0 4px 0 var(--shadow);
+  box-shadow: 0 3px 0 var(--shadow);
   will-change: transform;
 }
 

@@ -1,4 +1,4 @@
-const VERSION = "1.2.2";
+const VERSION = "1.3.0";
 
 const ANIMALS = [
   "bear",
@@ -408,32 +408,53 @@ function createCard(animal, index) {
   return button;
 }
 
-/** Pick cols/rows that maximize square card size for the current shell. */
-function bestGrid(total, availableW, availableH) {
-  let best = {
-    cols: MODES[selectedMode].cols,
-    rows: Math.ceil(total / MODES[selectedMode].cols),
-    size: 0,
-  };
+const SHELL_INSET = 8;
 
-  for (let cols = 2; cols <= total; cols += 1) {
-    if (total % cols !== 0) continue;
+function evenFactors(total) {
+  const colsOptions = [];
+  for (let cols = 1; cols <= total; cols += 1) {
+    if (total % cols === 0) colsOptions.push(cols);
+  }
+  return colsOptions;
+}
+
+function gapFor(cols, rows, availableW, availableH) {
+  return Math.max(4, Math.min(10, Math.round(Math.min(availableW / cols, availableH / rows) * 0.04)));
+}
+
+/** Prefer max square size; break ties with grids that match the shell aspect. */
+function bestGrid(total, availableW, availableH) {
+  const shellAspect = availableW / Math.max(availableH, 1);
+  let best = null;
+
+  evenFactors(total).forEach((cols) => {
     const rows = total / cols;
     const gap = gapFor(cols, rows, availableW, availableH);
     const size = Math.min(
       (availableW - gap * (cols - 1)) / cols,
       (availableH - gap * (rows - 1)) / rows
     );
-    if (size > best.size) {
-      best = { cols, rows, size };
+    if (size < 28) return;
+
+    const gridAspect = cols / rows;
+    const aspectDelta = Math.abs(Math.log(gridAspect / shellAspect));
+    const score = size * 1000 - aspectDelta * 50;
+
+    if (!best || score > best.score) {
+      best = { cols, rows, gap, size, score };
     }
-  }
+  });
 
-  return best;
-}
+  if (best) return best;
 
-function gapFor(cols, rows, availableW, availableH) {
-  return Math.max(4, Math.min(12, Math.floor(Math.min(availableW / cols, availableH / rows) * 0.05)));
+  const fallbackCols = MODES[selectedMode].cols;
+  return {
+    cols: fallbackCols,
+    rows: Math.ceil(total / fallbackCols),
+    gap: 6,
+    size: 40,
+    score: 0,
+  };
 }
 
 function cardSizeFor(cols, rows, availableW, availableH, gap) {
@@ -443,25 +464,24 @@ function cardSizeFor(cols, rows, availableW, availableH, gap) {
       (availableH - gap * (rows - 1)) / rows
     )
   );
-  // Shrink until the grid is guaranteed to stay inside the shell (subpixel-safe)
   while (
-    size > 32 &&
+    size > 28 &&
     (cols * size + gap * (cols - 1) > availableW || rows * size + gap * (rows - 1) > availableH)
   ) {
     size -= 1;
   }
-  return Math.max(32, size);
+  return Math.max(28, size);
 }
 
+/** @returns {boolean} true when the board was sized successfully */
 function fitBoard({ relock = false } = {}) {
   if (playEl.classList.contains("is-hidden") || !boardShell || deck.length === 0) {
-    return;
+    return false;
   }
 
-  // Insets keep card shadows / rounding from spilling off-screen
-  const availableW = Math.max(0, boardShell.clientWidth - 12);
-  const availableH = Math.max(0, boardShell.clientHeight - 14);
-  if (availableW < 16 || availableH < 16) return;
+  const availableW = Math.floor(boardShell.clientWidth) - SHELL_INSET * 2;
+  const availableH = Math.floor(boardShell.clientHeight) - SHELL_INSET * 2;
+  if (availableW < 40 || availableH < 40) return false;
 
   if (relock || !lockedGrid) {
     const picked = bestGrid(deck.length, availableW, availableH);
@@ -471,25 +491,39 @@ function fitBoard({ relock = false } = {}) {
   const { cols, rows } = lockedGrid;
   const gap = gapFor(cols, rows, availableW, availableH);
   const cardSize = cardSizeFor(cols, rows, availableW, availableH, gap);
+  const boardW = cols * cardSize + gap * (cols - 1);
+  const boardH = rows * cardSize + gap * (rows - 1);
 
   boardEl.dataset.cols = String(cols);
   boardEl.style.setProperty("--cols", String(cols));
   boardEl.style.setProperty("--rows", String(rows));
   boardEl.style.setProperty("--board-gap", `${gap}px`);
   boardEl.style.setProperty("--card-size", `${cardSize}px`);
+  boardEl.style.setProperty("--board-w", `${boardW}px`);
+  boardEl.style.setProperty("--board-h", `${boardH}px`);
+  return true;
 }
 
 function scheduleFitBoard({ relock = false } = {}) {
   if (fitRaf) cancelAnimationFrame(fitRaf);
-  fitRaf = requestAnimationFrame(() => {
-    fitRaf = 0;
-    fitBoard({ relock });
-    // Second pass after flex/chrome settles (banner, fonts, safe areas)
+
+  const run = (attemptsLeft, shouldRelock) => {
     fitRaf = requestAnimationFrame(() => {
       fitRaf = 0;
-      fitBoard({ relock: false });
+      const ok = fitBoard({ relock: shouldRelock });
+      if (!ok && attemptsLeft > 0) {
+        run(attemptsLeft - 1, shouldRelock);
+      } else if (ok && shouldRelock) {
+        // One settle pass after first successful lock (fonts/flex)
+        fitRaf = requestAnimationFrame(() => {
+          fitRaf = 0;
+          fitBoard({ relock: false });
+        });
+      }
     });
-  });
+  };
+
+  run(12, relock);
 }
 
 function buildBoard() {
@@ -529,8 +563,7 @@ function endPreview() {
   boardEl.classList.remove("is-previewing");
   previewBanner.classList.add("is-hidden");
   hideAllCards();
-  // Grow cards into freed banner space, but keep the same cols/rows
-  scheduleFitBoard({ relock: false });
+  // Banner slot stays reserved — no reflow / no position change
 }
 
 function startPreview() {
@@ -544,7 +577,6 @@ function startPreview() {
   previewBanner.classList.remove("is-hidden");
   previewCount.textContent = String(remaining);
   revealAllCards();
-  // Lock grid while the banner is visible so positions stay consistent later
   scheduleFitBoard({ relock: true });
 
   previewIntervalId = setInterval(() => {
@@ -733,6 +765,18 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", () => scheduleFitBoard({ relock: true }), {
     passive: true,
   });
+}
+
+if (boardShell && typeof ResizeObserver !== "undefined") {
+  let lastShellKey = "";
+  const shellObserver = new ResizeObserver(() => {
+    if (playEl.classList.contains("is-hidden") || deck.length === 0) return;
+    const key = `${boardShell.clientWidth}x${boardShell.clientHeight}`;
+    if (key === lastShellKey) return;
+    lastShellKey = key;
+    scheduleFitBoard({ relock: true });
+  });
+  shellObserver.observe(boardShell);
 }
 
 // Unlock audio on first tap anywhere (mobile autoplay policies)

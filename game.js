@@ -309,18 +309,18 @@ function onCardClick(card) {
   const [first, second] = flipped;
 
   if (first.dataset.animal === second.dataset.animal) {
-    first.classList.add("is-matched");
-    second.classList.add("is-matched");
     first.disabled = true;
     second.disabled = true;
     flipped = [];
     matchedCount += 1;
     updateHud();
+    celebrateMatch(first, second);
 
     if (matchedCount === MODES[selectedMode].pairs) {
       stopTimer();
       winSummary.textContent = `${MODES[selectedMode].label} cleared in ${moves} moves · ${formatTime(seconds)}`;
-      winModal.classList.remove("is-hidden");
+      // Let the match burst land before the win modal covers it
+      setTimeout(() => winModal.classList.remove("is-hidden"), 650);
     }
     return;
   }
@@ -337,6 +337,70 @@ function onCardClick(card) {
     flipped = [];
     lockBoard = false;
   }, 700);
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function celebrateMatch(first, second) {
+  first.classList.add("is-matched", "is-match-pop");
+  second.classList.add("is-matched", "is-match-pop");
+  pairsEl.classList.remove("is-pair-pulse");
+  // Retrigger pairs HUD pulse
+  void pairsEl.offsetWidth;
+  pairsEl.classList.add("is-pair-pulse");
+
+  if (!prefersReducedMotion()) {
+    spawnMatchBurst(first, second);
+  }
+
+  const clearPop = () => {
+    first.classList.remove("is-match-pop");
+    second.classList.remove("is-match-pop");
+  };
+  first.addEventListener("animationend", clearPop, { once: true });
+  setTimeout(clearPop, 800);
+}
+
+/** Sun-ring + leaf/seed scatter between the two matched cards. */
+function spawnMatchBurst(first, second) {
+  const a = first.getBoundingClientRect();
+  const b = second.getBoundingClientRect();
+  const cx = (a.left + a.right + b.left + b.right) / 4 + window.scrollX;
+  const cy = (a.top + a.bottom + b.top + b.bottom) / 4 + window.scrollY;
+
+  const burst = document.createElement("div");
+  burst.className = "match-burst";
+  burst.style.left = `${cx}px`;
+  burst.style.top = `${cy}px`;
+  burst.setAttribute("aria-hidden", "true");
+
+  const flash = document.createElement("div");
+  flash.className = "match-flash";
+  burst.appendChild(flash);
+
+  const ring = document.createElement("div");
+  ring.className = "match-ring";
+  burst.appendChild(ring);
+
+  const count = 16;
+  for (let i = 0; i < count; i += 1) {
+    const particle = document.createElement("span");
+    const kind = i % 4 === 0 ? "is-leaf" : i % 4 === 1 ? "is-petal" : "is-seed";
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.55;
+    const dist = 36 + Math.random() * 78;
+    particle.className = `match-particle ${kind}`;
+    particle.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+    particle.style.setProperty("--dy", `${Math.sin(angle) * dist - 12}px`);
+    particle.style.setProperty("--rot", `${Math.random() * 420 - 60}deg`);
+    particle.style.setProperty("--spin", `${180 + Math.random() * 280}deg`);
+    particle.style.animationDelay = `${Math.random() * 70}ms`;
+    burst.appendChild(particle);
+  }
+
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 950);
 }
 
 function setMode(mode) {

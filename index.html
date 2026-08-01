@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animal Match — Memory Game</title>
+    <meta
+      name="description"
+      content="Flip cards and match the animals. Easy, medium, and hard modes."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="sky" aria-hidden="true"></div>
+    <div class="meadow" aria-hidden="true"></div>
+
+    <main class="app">
+      <header class="hero">
+        <p class="eyebrow">Kenney Animal Pack</p>
+        <h1 class="brand">Animal Match</h1>
+        <p class="tagline">Flip two cards. Find every pair.</p>
+      </header>
+
+      <section class="setup" id="setup" aria-labelledby="difficulty-label">
+        <h2 id="difficulty-label" class="sr-only">Choose difficulty</h2>
+        <div class="modes" role="group" aria-label="Difficulty">
+          <button class="mode-btn" data-mode="easy" type="button">
+            <span class="mode-name">Easy</span>
+            <span class="mode-meta">6 pairs · 3×4</span>
+          </button>
+          <button class="mode-btn is-active" data-mode="medium" type="button">
+            <span class="mode-name">Medium</span>
+            <span class="mode-meta">8 pairs · 4×4</span>
+          </button>
+          <button class="mode-btn" data-mode="hard" type="button">
+            <span class="mode-name">Hard</span>
+            <span class="mode-meta">12 pairs · 4×6</span>
+          </button>
+        </div>
+        <button class="btn primary" id="start-btn" type="button">Start game</button>
+      </section>
+
+      <section class="play is-hidden" id="play" aria-live="polite">
+        <div class="hud">
+          <div class="stat">
+            <span class="stat-label">Moves</span>
+            <span class="stat-value" id="moves">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Time</span>
+            <span class="stat-value" id="timer">0:00</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Pairs</span>
+            <span class="stat-value" id="pairs">0/0</span>
+          </div>
+          <button class="btn ghost" id="restart-btn" type="button">New game</button>
+        </div>
+        <div class="board" id="board" role="grid" aria-label="Memory board"></div>
+      </section>
+    </main>
+
+    <div class="modal is-hidden" id="win-modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div class="modal-card">
+        <h2 id="win-title">All matched!</h2>
+        <p id="win-summary"></p>
+        <div class="modal-actions">
+          <button class="btn primary" id="play-again-btn" type="button">Play again</button>
+          <button class="btn ghost" id="change-mode-btn" type="button">Change mode</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="credit">
+      Animals by
+      <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener"
+        >Kenney.nl</a
+      >
+      (CC0)
+    </footer>
+
+    <script src="game.js"></script>
+  </body>
+</html>

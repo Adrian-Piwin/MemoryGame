@@ -6,7 +6,7 @@
     <title>Animal Match — Memory Game</title>
     <meta
       name="description"
-      content="Flip cards and match the animals. Easy, medium, and hard modes."
+      content="Flip cards and match pairs. Choose animals or Pokémon. Easy, medium, and hard modes."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=1.3.1" />
+    <link rel="stylesheet" href="styles.css?v=1.4.0" />
   </head>
   <body>
     <div class="sky" aria-hidden="true"></div>
@@ -22,8 +22,8 @@
     <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
     <main class="app">
       <header class="hero">
-        <p class="eyebrow">Kenney Animal Pack</p>
-        <h1 class="brand">Animal Match</h1>
+        <p class="eyebrow" id="hero-eyebrow">Kenney Animal Pack</p>
+        <h1 class="brand" id="hero-brand">Animal Match</h1>
         <p class="tagline">Flip two cards. Find every pair.</p>
       </header>
 
@@ -43,6 +43,13 @@
             <span class="mode-meta">12 pairs · 2s peek</span>
           </button>
         </div>
+        <label class="theme-picker" for="theme-select">
+          <span class="theme-picker-label">Theme</span>
+          <select id="theme-select" aria-label="Card theme">
+            <option value="animals">Animals</option>
+            <option value="pokemon">Pokémon</option>
+          </select>
+        </label>
         <div class="setup-actions">
           <button class="btn primary" id="start-btn" type="button">Start game</button>
           <button class="btn ghost sound-btn is-on" id="mute-btn" type="button" aria-pressed="false">
@@ -72,7 +79,7 @@
         </div>
         <div class="preview-slot">
           <p class="preview-banner is-hidden" id="preview-banner" aria-live="polite">
-            Memorize the animals… <span id="preview-count">0</span>s
+            Memorize the cards… <span id="preview-count">0</span>s
           </p>
         </div>
         <div class="board-shell">
@@ -92,8 +99,8 @@
       </div>
     </div>
 
-    <p class="version" id="version-label" aria-label="Version">v1.3.1</p>
-    <footer class="credit">
+    <p class="version" id="version-label" aria-label="Version">v1.4.0</p>
+    <footer class="credit" id="credit">
       Animals by
       <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener"
         >Kenney.nl</a
@@ -101,6 +108,6 @@
       (CC0)
     </footer>
 
-    <script src="game.js?v=1.3.1"></script>
+    <script src="game.js?v=1.4.0"></script>
   </body>
 </html>

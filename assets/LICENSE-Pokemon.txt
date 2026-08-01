@@ -1,0 +1,13 @@
+Pokémon sprites
+===============
+
+Official artwork PNGs sourced from the PokéAPI sprites repository:
+https://github.com/PokeAPI/sprites
+
+Pokémon and Pokémon character names are trademarks of Nintendo,
+Game Freak, and Creatures. These images are used for a personal /
+educational fan project and are not claimed as original work.
+
+Sprites remain the property of their respective copyright holders.
+Do not redistribute commercially without permission from Nintendo /
+The Pokémon Company.

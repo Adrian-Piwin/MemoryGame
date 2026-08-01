@@ -1,8 +1,8 @@
 # Animal Match
 
-Version `1.3.1`
+Version `1.4.0`
 
-A browser memory game built with [Kenney's Animal Pack Redux](https://kenney.nl/assets/animal-pack-redux) (CC0).
+A browser memory game with swappable card themes: Kenney animals and Pokémon sprites.
 
 ## Play
 
@@ -18,11 +18,18 @@ Or open `index.html` locally.
 | Medium | 8     | 4×4  | 4s   |
 | Hard   | 12    | 4×6  | 2s   |
 
+## Themes
+
+Choose a theme from the main menu dropdown:
+
+- **Animals** — Kenney Animal Pack Redux (CC0)
+- **Pokémon** — Official artwork via [PokéAPI sprites](https://github.com/PokeAPI/sprites)
+
 ## Assets
 
-Animal sprites from **Kenney.nl** — Animal Pack Redux, CC0 / public domain.  
-See `assets/LICENSE-Kenney.txt`.
+- Animal sprites from **Kenney.nl** — Animal Pack Redux, CC0 / public domain. See `assets/LICENSE-Kenney.txt`.
+- Pokémon artwork from **PokéAPI/sprites**. Pokémon is a trademark of Nintendo / Game Freak / Creatures. See `assets/LICENSE-Pokemon.txt`.
 
 ## License
 
-Game code: MIT. Assets remain CC0 (Kenney).
+Game code: MIT. Animal assets remain CC0 (Kenney). Pokémon sprites remain copyright of their respective owners.

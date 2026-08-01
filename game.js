@@ -1,43 +1,95 @@
-const VERSION = "1.3.1";
+const VERSION = "1.4.0";
 
-const ANIMALS = [
-  "bear",
-  "buffalo",
-  "chick",
-  "chicken",
-  "cow",
-  "crocodile",
-  "dog",
-  "duck",
-  "elephant",
-  "frog",
-  "giraffe",
-  "goat",
-  "gorilla",
-  "hippo",
-  "horse",
-  "monkey",
-  "moose",
-  "narwhal",
-  "owl",
-  "panda",
-  "parrot",
-  "penguin",
-  "pig",
-  "rabbit",
-  "rhino",
-  "sloth",
-  "snake",
-  "walrus",
-  "whale",
-  "zebra",
-];
+const THEMES = {
+  animals: {
+    id: "animals",
+    label: "Animals",
+    brand: "Animal Match",
+    eyebrow: "Kenney Animal Pack",
+    folder: "assets/animals",
+    noun: "animal",
+    creditHtml:
+      'Animals by <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener">Kenney.nl</a> (CC0)',
+    cards: [
+      "bear",
+      "buffalo",
+      "chick",
+      "chicken",
+      "cow",
+      "crocodile",
+      "dog",
+      "duck",
+      "elephant",
+      "frog",
+      "giraffe",
+      "goat",
+      "gorilla",
+      "hippo",
+      "horse",
+      "monkey",
+      "moose",
+      "narwhal",
+      "owl",
+      "panda",
+      "parrot",
+      "penguin",
+      "pig",
+      "rabbit",
+      "rhino",
+      "sloth",
+      "snake",
+      "walrus",
+      "whale",
+      "zebra",
+    ],
+  },
+  pokemon: {
+    id: "pokemon",
+    label: "Pokémon",
+    brand: "Pokémon Match",
+    eyebrow: "PokéAPI Sprites",
+    folder: "assets/pokemon",
+    noun: "Pokémon",
+    creditHtml:
+      'Sprites via <a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener">PokéAPI</a> · © Nintendo / Game Freak / Creatures',
+    cards: [
+      "bulbasaur",
+      "charmander",
+      "squirtle",
+      "pikachu",
+      "jigglypuff",
+      "meowth",
+      "psyduck",
+      "gengar",
+      "eevee",
+      "snorlax",
+      "dragonite",
+      "mewtwo",
+      "mew",
+      "charizard",
+      "blastoise",
+      "lapras",
+      "arcanine",
+      "gyarados",
+      "alakazam",
+      "scyther",
+      "vulpix",
+      "growlithe",
+      "ponyta",
+      "seel",
+      "cubone",
+      "chansey",
+    ],
+  },
+};
 
 const MODES = {
   easy: { pairs: 6, cols: 3, label: "Easy", previewSeconds: 8 },
   medium: { pairs: 8, cols: 4, label: "Medium", previewSeconds: 4 },
   hard: { pairs: 12, cols: 6, label: "Hard", previewSeconds: 2 },
 };
+
+const THEME_STORAGE_KEY = "animal-match-theme";
 
 const CONFETTI_COLORS = [
   "#FF5DA2",
@@ -67,12 +119,22 @@ const muteBtnPlay = document.getElementById("mute-btn-play");
 const confettiCanvas = document.getElementById("confetti-canvas");
 const startBtn = document.getElementById("start-btn");
 const versionLabel = document.getElementById("version-label");
+const themeSelect = document.getElementById("theme-select");
+const heroEyebrow = document.getElementById("hero-eyebrow");
+const heroBrand = document.getElementById("hero-brand");
+const creditEl = document.getElementById("credit");
 
 if (versionLabel) versionLabel.textContent = `v${VERSION}`;
 
 const imageCache = new Map();
 let assetsReady = null;
 
+function readStoredTheme() {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  return saved && THEMES[saved] ? saved : "animals";
+}
+
+let selectedTheme = readStoredTheme();
 let selectedMode = "medium";
 let deck = [];
 let flipped = [];
@@ -283,18 +345,45 @@ const confetti = {
   },
 };
 
-/* ---------------- Image preload / decode ---------------- */
+/* ---------------- Themes / image preload ---------------- */
 
-function animalSrc(name) {
-  return `assets/animals/${name}.png`;
+function currentTheme() {
+  return THEMES[selectedTheme] || THEMES.animals;
 }
 
-function preloadAnimals(names = ANIMALS) {
-  const jobs = names.map(async (name) => {
-    if (imageCache.has(name)) return imageCache.get(name);
+function cacheKey(themeId, name) {
+  return `${themeId}:${name}`;
+}
+
+function cardSrc(name, themeId = selectedTheme) {
+  const theme = THEMES[themeId] || THEMES.animals;
+  return `${theme.folder}/${name}.png`;
+}
+
+function hiddenCardLabel() {
+  return `Hidden ${currentTheme().noun} card`;
+}
+
+function applyThemeChrome() {
+  const theme = currentTheme();
+  if (heroEyebrow) heroEyebrow.textContent = theme.eyebrow;
+  if (heroBrand) heroBrand.textContent = theme.brand;
+  if (creditEl) creditEl.innerHTML = theme.creditHtml;
+  document.title = `${theme.brand} — Memory Game`;
+  if (themeSelect && themeSelect.value !== selectedTheme) {
+    themeSelect.value = selectedTheme;
+  }
+  document.body.dataset.theme = theme.id;
+}
+
+function preloadTheme(themeId = selectedTheme) {
+  const theme = THEMES[themeId] || THEMES.animals;
+  const jobs = theme.cards.map(async (name) => {
+    const key = cacheKey(theme.id, name);
+    if (imageCache.has(key)) return imageCache.get(key);
     const img = new Image();
     img.decoding = "async";
-    img.src = animalSrc(name);
+    img.src = cardSrc(name, theme.id);
     try {
       await img.decode();
     } catch {
@@ -303,13 +392,25 @@ function preloadAnimals(names = ANIMALS) {
         img.onerror = reject;
       }).catch(() => {});
     }
-    imageCache.set(name, img);
+    imageCache.set(key, img);
     return img;
   });
   return Promise.all(jobs);
 }
 
-assetsReady = preloadAnimals();
+function setTheme(themeId) {
+  if (!THEMES[themeId] || themeId === selectedTheme) {
+    applyThemeChrome();
+    return;
+  }
+  selectedTheme = themeId;
+  localStorage.setItem(THEME_STORAGE_KEY, themeId);
+  applyThemeChrome();
+  assetsReady = preloadTheme(themeId);
+}
+
+assetsReady = preloadTheme(selectedTheme);
+applyThemeChrome();
 
 /* ---------------- Game helpers ---------------- */
 
@@ -326,8 +427,8 @@ function shuffle(list) {
   return arr;
 }
 
-function pickAnimals(count) {
-  return shuffle(ANIMALS).slice(0, count);
+function pickCards(count) {
+  return shuffle(currentTheme().cards).slice(0, count);
 }
 
 function formatTime(totalSeconds) {
@@ -373,13 +474,13 @@ function startTimer() {
   }, 1000);
 }
 
-function createCard(animal, index) {
+function createCard(cardName, index) {
   const button = document.createElement("button");
   button.className = "card";
   button.type = "button";
-  button.dataset.animal = animal;
+  button.dataset.animal = cardName;
   button.dataset.index = String(index);
-  button.setAttribute("aria-label", "Hidden animal card");
+  button.setAttribute("aria-label", hiddenCardLabel());
 
   const inner = document.createElement("div");
   inner.className = "card-inner";
@@ -392,14 +493,14 @@ function createCard(animal, index) {
   front.className = "card-face card-front";
 
   const img = document.createElement("img");
-  img.alt = animal;
+  img.alt = cardName;
   img.draggable = false;
   img.decoding = "async";
   img.width = 128;
   img.height = 96;
   // Reuse decoded cache entry so the browser does not re-fetch/re-decode
-  const cached = imageCache.get(animal);
-  img.src = cached?.src || animalSrc(animal);
+  const cached = imageCache.get(cacheKey(selectedTheme, cardName));
+  img.src = cached?.src || cardSrc(cardName);
 
   front.appendChild(img);
   inner.append(back, front);
@@ -538,16 +639,16 @@ function scheduleFitBoard({ relock = false } = {}) {
 
 function buildBoard() {
   const { pairs, cols } = MODES[selectedMode];
-  const animals = pickAnimals(pairs);
-  deck = shuffle([...animals, ...animals]);
+  const picks = pickCards(pairs);
+  deck = shuffle([...picks, ...picks]);
   boardEl.replaceChildren();
   boardEl.dataset.cols = String(cols);
   boardEl.style.setProperty("--cols", String(cols));
   boardEl.style.setProperty("--rows", String(Math.ceil((pairs * 2) / cols)));
 
   const frag = document.createDocumentFragment();
-  deck.forEach((animal, index) => {
-    frag.appendChild(createCard(animal, index));
+  deck.forEach((cardName, index) => {
+    frag.appendChild(createCard(cardName, index));
   });
   boardEl.appendChild(frag);
 }
@@ -562,7 +663,7 @@ function revealAllCards() {
 function hideAllCards() {
   getCards().forEach((card) => {
     card.classList.remove("is-flipped");
-    card.setAttribute("aria-label", "Hidden animal card");
+    card.setAttribute("aria-label", hiddenCardLabel());
   });
 }
 
@@ -734,8 +835,8 @@ function onCardClick(card) {
   setTimeout(() => {
     first.classList.remove("is-flipped", "is-mismatch");
     second.classList.remove("is-flipped", "is-mismatch");
-    first.setAttribute("aria-label", "Hidden animal card");
-    second.setAttribute("aria-label", "Hidden animal card");
+    first.setAttribute("aria-label", hiddenCardLabel());
+    second.setAttribute("aria-label", hiddenCardLabel());
     flipped = [];
     lockBoard = false;
   }, 550);
@@ -750,6 +851,10 @@ function setMode(mode) {
 
 document.querySelectorAll(".mode-btn").forEach((btn) => {
   btn.addEventListener("click", () => setMode(btn.dataset.mode));
+});
+
+themeSelect?.addEventListener("change", () => {
+  setTheme(themeSelect.value);
 });
 
 startBtn.addEventListener("click", () => {

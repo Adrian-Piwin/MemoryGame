@@ -196,6 +196,82 @@ body.is-playing .hero {
   color: var(--ink-soft);
 }
 
+.theme-picker {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: stretch;
+  width: min(280px, 100%);
+  text-align: left;
+}
+
+.theme-picker-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.theme-picker select {
+  appearance: none;
+  width: 100%;
+  padding: 0.75rem 2.4rem 0.75rem 1rem;
+  border: 3px solid rgba(30, 70, 40, 0.18);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%) calc(100% - 1.15rem) calc(50% - 0.18rem) / 0.45rem 0.45rem no-repeat,
+    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%) calc(100% - 0.85rem) calc(50% - 0.18rem) / 0.45rem 0.45rem no-repeat,
+    rgba(255, 248, 231, 0.9);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(30, 70, 40, 0.16);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-picker select:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 0 rgba(30, 70, 40, 0.16);
+}
+
+.theme-picker select:focus-visible {
+  outline: 3px solid var(--sunshine);
+  outline-offset: 3px;
+}
+
+body[data-theme="pokemon"] {
+  --sky-top: #5b9fd4;
+  --sky-mid: #8ec4ef;
+  --meadow: #3d8f6a;
+  --meadow-deep: #24624a;
+  --leaf: #184536;
+  --sunshine: #ffcb05;
+  --sun-deep: #e6a800;
+  --card-back: #cc0000;
+  --card-back-edge: #8b0000;
+  --match: #7ec8ff;
+}
+
+body[data-theme="pokemon"] .card-back {
+  background: linear-gradient(145deg, #ef2d2d 0%, var(--card-back) 55%, var(--card-back-edge) 100%);
+}
+
+body[data-theme="pokemon"] .card-back::after {
+  border: 2px solid rgba(255, 248, 231, 0.85);
+  background:
+    linear-gradient(180deg, #ef2d2d 0 46%, #1a1a1a 46% 54%, #fff8e7 54% 100%),
+    radial-gradient(circle at 50% 50%, #fff8e7 0 22%, #1a1a1a 23% 30%, transparent 31%);
+  background-blend-mode: normal;
+}
+
+body[data-theme="pokemon"] .card.is-matched .card-front {
+  background: #eef7ff;
+  border-color: var(--match);
+}
+
 .btn {
   appearance: none;
   border: none;

@@ -241,6 +241,37 @@ body.is-playing .hero {
   background: var(--paper);
 }
 
+.sound-btn {
+  transition: opacity 0.2s ease, filter 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sound-btn.is-on {
+  background: linear-gradient(180deg, var(--sunshine) 0%, var(--sun-deep) 100%);
+  color: var(--ink);
+  border: 2px solid rgba(196, 137, 16, 0.45);
+  box-shadow: 0 4px 0 #c48910;
+  opacity: 1;
+  filter: none;
+}
+
+.sound-btn.is-on:hover {
+  filter: brightness(1.05);
+  background: linear-gradient(180deg, var(--sunshine) 0%, var(--sun-deep) 100%);
+}
+
+.sound-btn.is-off {
+  background: rgba(255, 248, 231, 0.45);
+  border: 2px solid rgba(30, 70, 40, 0.12);
+  box-shadow: none;
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.sound-btn.is-off:hover {
+  opacity: 0.62;
+  background: rgba(255, 248, 231, 0.55);
+}
+
 .play.is-hidden,
 .setup.is-hidden,
 .modal.is-hidden {
@@ -320,6 +351,8 @@ body.is-playing .hero {
   display: grid;
   place-items: center;
   overflow: hidden;
+  padding: 2px;
+  box-sizing: border-box;
 }
 
 .board {

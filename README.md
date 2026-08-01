@@ -1,6 +1,6 @@
 # Animal Match
 
-Version `1.6.0`
+Version `1.6.1`
 
 A browser memory game with swappable card themes: Kenney animals, Pokémon sprites, and fairy-tale princesses.
 Cheerful looping background music plays on the menu and during games (toggle with Sound on/off).

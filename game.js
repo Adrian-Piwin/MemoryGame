@@ -1,4 +1,4 @@
-const VERSION = "1.6.1";
+const VERSION = "1.6.2";
 
 // Block pinch-zoom on iOS Safari (viewport user-scalable is ignored there)
 for (const eventName of ["gesturestart", "gesturechange", "gestureend"]) {
@@ -114,8 +114,8 @@ const THEMES = {
 
 const MODES = {
   easy: { pairs: 6, cols: 3, label: "Easy", previewSeconds: 8 },
-  medium: { pairs: 8, cols: 4, label: "Medium", previewSeconds: 4 },
-  hard: { pairs: 12, cols: 6, label: "Hard", previewSeconds: 2 },
+  medium: { pairs: 7, cols: 4, label: "Medium", previewSeconds: 4 },
+  hard: { pairs: 8, cols: 4, label: "Hard", previewSeconds: 2 },
 };
 
 const THEME_STORAGE_KEY = "animal-match-theme";
@@ -145,6 +145,10 @@ const previewBanner = document.getElementById("preview-banner");
 const previewCount = document.getElementById("preview-count");
 const muteBtn = document.getElementById("mute-btn");
 const muteBtnPlay = document.getElementById("mute-btn-play");
+const musicVolumeInputs = [
+  document.getElementById("music-volume"),
+  document.getElementById("music-volume-play"),
+].filter(Boolean);
 const confettiCanvas = document.getElementById("confetti-canvas");
 const startBtn = document.getElementById("start-btn");
 const versionLabel = document.getElementById("version-label");
@@ -183,6 +187,15 @@ let started = false;
 
 const MUSIC_MENU_VOLUME = 0.2;
 const MUSIC_PLAY_VOLUME = 0.32;
+const MUSIC_VOLUME_STORAGE_KEY = "animal-match-music-volume";
+
+function readStoredMusicVolume() {
+  const raw = localStorage.getItem(MUSIC_VOLUME_STORAGE_KEY);
+  if (raw == null) return 1;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(1, Math.max(0, value));
+}
 
 const sfx = {
   ctx: null,
@@ -249,6 +262,7 @@ const sfx = {
 const music = {
   audio: null,
   scene: "menu", // menu | play
+  level: readStoredMusicVolume(), // 0–1 multiplier on scene base volume
 
   ensure() {
     if (this.audio) return this.audio;
@@ -266,7 +280,15 @@ const music = {
 
   applyVolume() {
     if (!this.audio) return;
-    this.audio.volume = this.scene === "play" ? MUSIC_PLAY_VOLUME : MUSIC_MENU_VOLUME;
+    const base = this.scene === "play" ? MUSIC_PLAY_VOLUME : MUSIC_MENU_VOLUME;
+    this.audio.volume = base * this.level;
+  },
+
+  setLevel(level) {
+    this.level = Math.min(1, Math.max(0, level));
+    localStorage.setItem(MUSIC_VOLUME_STORAGE_KEY, String(this.level));
+    this.applyVolume();
+    this.sync();
   },
 
   setScene(scene) {
@@ -276,7 +298,7 @@ const music = {
   },
 
   play() {
-    if (sfx.muted) return;
+    if (sfx.muted || this.level <= 0) return;
     const audio = this.ensure();
     this.applyVolume();
     const start = audio.play();
@@ -288,7 +310,7 @@ const music = {
   },
 
   sync() {
-    if (sfx.muted) {
+    if (sfx.muted || this.level <= 0) {
       this.pause();
       return;
     }
@@ -309,6 +331,25 @@ function updateMuteButton() {
     btn.classList.toggle("is-on", on);
     btn.classList.toggle("is-off", !on);
   });
+  updateMusicVolumeUI();
+}
+
+function updateMusicVolumeUI() {
+  const pct = Math.round(music.level * 100);
+  musicVolumeInputs.forEach((input) => {
+    input.value = String(pct);
+    input.setAttribute("aria-valuenow", String(pct));
+    input.disabled = sfx.muted;
+    const wrap = input.closest(".volume-control");
+    wrap?.classList.toggle("is-disabled", sfx.muted);
+  });
+}
+
+function setMusicVolumeFromInput(value) {
+  const pct = Number(value);
+  const level = Number.isFinite(pct) ? pct / 100 : 1;
+  music.setLevel(level);
+  updateMusicVolumeUI();
 }
 
 function toggleMute() {
@@ -979,6 +1020,13 @@ document.getElementById("change-mode-btn").addEventListener("click", showSetup);
 muteBtn?.addEventListener("click", toggleMute);
 muteBtnPlay?.addEventListener("click", toggleMute);
 
+musicVolumeInputs.forEach((input) => {
+  input.addEventListener("input", () => {
+    sfx.unlock();
+    setMusicVolumeFromInput(input.value);
+  });
+});
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !winModal.classList.contains("is-hidden")) {
     winModal.classList.add("is-hidden");
@@ -1041,5 +1089,6 @@ document.addEventListener(
 );
 
 updateMuteButton();
+updateMusicVolumeUI();
 music.ensure();
 confetti.ensure();

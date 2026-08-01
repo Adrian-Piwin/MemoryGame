@@ -389,6 +389,80 @@ body[data-theme="princesses"] .card.is-matched .card-front {
   background: rgba(255, 248, 231, 0.55);
 }
 
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 9.5rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 248, 231, 0.82);
+  border: 2px solid rgba(30, 70, 40, 0.18);
+  border-radius: 999px;
+  color: var(--ink);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.volume-control.is-disabled {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.volume-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.volume-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 5.5rem;
+  height: 0.4rem;
+  margin: 0;
+  background: rgba(30, 70, 40, 0.16);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--sunshine) 0%, var(--sun-deep) 100%);
+  border: 2px solid rgba(196, 137, 16, 0.55);
+  box-shadow: 0 2px 0 #c48910;
+  cursor: pointer;
+}
+
+.volume-control input[type="range"]::-moz-range-thumb {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--sunshine) 0%, var(--sun-deep) 100%);
+  border: 2px solid rgba(196, 137, 16, 0.55);
+  box-shadow: 0 2px 0 #c48910;
+  cursor: pointer;
+}
+
+.volume-control--compact {
+  min-width: 8.25rem;
+  padding: 0.35rem 0.65rem;
+}
+
+.volume-control--compact .volume-label {
+  font-size: 0.62rem;
+}
+
+.volume-control--compact input[type="range"] {
+  min-width: 4.5rem;
+}
+
 .play.is-hidden,
 .setup.is-hidden,
 .modal.is-hidden {

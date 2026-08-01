@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=1.6.1" />
+    <link rel="stylesheet" href="styles.css?v=1.6.2" />
   </head>
   <body>
     <div class="sky" aria-hidden="true"></div>
@@ -39,11 +39,11 @@
           </button>
           <button class="mode-btn is-active" data-mode="medium" type="button">
             <span class="mode-name">Medium</span>
-            <span class="mode-meta">8 pairs · 4s peek</span>
+            <span class="mode-meta">7 pairs · 4s peek</span>
           </button>
           <button class="mode-btn" data-mode="hard" type="button">
             <span class="mode-name">Hard</span>
-            <span class="mode-meta">12 pairs · 2s peek</span>
+            <span class="mode-meta">8 pairs · 2s peek</span>
           </button>
         </div>
         <label class="theme-picker" for="theme-select">
@@ -59,6 +59,18 @@
           <button class="btn ghost sound-btn is-on" id="mute-btn" type="button" aria-pressed="false">
             Sound on
           </button>
+          <label class="volume-control" for="music-volume">
+            <span class="volume-label">Music</span>
+            <input
+              type="range"
+              id="music-volume"
+              min="0"
+              max="100"
+              step="1"
+              value="100"
+              aria-label="Music volume"
+            />
+          </label>
         </div>
       </section>
 
@@ -80,6 +92,18 @@
           <button class="btn ghost sound-btn is-on" id="mute-btn-play" type="button" aria-pressed="false">
             Sound on
           </button>
+          <label class="volume-control volume-control--compact" for="music-volume-play">
+            <span class="volume-label">Music</span>
+            <input
+              type="range"
+              id="music-volume-play"
+              min="0"
+              max="100"
+              step="1"
+              value="100"
+              aria-label="Music volume"
+            />
+          </label>
         </div>
         <div class="preview-slot">
           <p class="preview-banner is-hidden" id="preview-banner" aria-live="polite">
@@ -103,7 +127,7 @@
       </div>
     </div>
 
-    <p class="version" id="version-label" aria-label="Version">v1.6.1</p>
+    <p class="version" id="version-label" aria-label="Version">v1.6.2</p>
     <footer class="credit" id="credit">
       Animals by
       <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener"
@@ -119,6 +143,6 @@
       by Cleyton Kauffman (CC0)
     </p>
 
-    <script src="game.js?v=1.6.1"></script>
+    <script src="game.js?v=1.6.2"></script>
   </body>
 </html>

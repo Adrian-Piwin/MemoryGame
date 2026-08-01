@@ -32,9 +32,9 @@ const ANIMALS = [
 ];
 
 const MODES = {
-  easy: { pairs: 6, cols: 3, label: "Easy" },
-  medium: { pairs: 8, cols: 4, label: "Medium" },
-  hard: { pairs: 12, cols: 6, label: "Hard" },
+  easy: { pairs: 6, cols: 3, label: "Easy", previewSeconds: 8 },
+  medium: { pairs: 8, cols: 4, label: "Medium", previewSeconds: 4 },
+  hard: { pairs: 12, cols: 6, label: "Hard", previewSeconds: 2 },
 };
 
 const setupEl = document.getElementById("setup");
@@ -45,6 +45,8 @@ const timerEl = document.getElementById("timer");
 const pairsEl = document.getElementById("pairs");
 const winModal = document.getElementById("win-modal");
 const winSummary = document.getElementById("win-summary");
+const previewBanner = document.getElementById("preview-banner");
+const previewCount = document.getElementById("preview-count");
 
 let selectedMode = "medium";
 let deck = [];
@@ -52,7 +54,10 @@ let flipped = [];
 let matchedCount = 0;
 let moves = 0;
 let lockBoard = false;
+let previewing = false;
 let timerId = null;
+let previewTimeoutId = null;
+let previewIntervalId = null;
 let seconds = 0;
 let started = false;
 
@@ -75,6 +80,10 @@ function formatTime(totalSeconds) {
   return `${mins}:${secs}`;
 }
 
+function getCards() {
+  return [...boardEl.querySelectorAll(".card")];
+}
+
 function updateHud() {
   const totalPairs = MODES[selectedMode].pairs;
   movesEl.textContent = String(moves);
@@ -86,6 +95,17 @@ function stopTimer() {
   if (timerId) {
     clearInterval(timerId);
     timerId = null;
+  }
+}
+
+function clearPreviewTimers() {
+  if (previewTimeoutId) {
+    clearTimeout(previewTimeoutId);
+    previewTimeoutId = null;
+  }
+  if (previewIntervalId) {
+    clearInterval(previewIntervalId);
+    previewIntervalId = null;
   }
 }
 
@@ -127,14 +147,65 @@ function buildBoard() {
   });
 }
 
+function revealAllCards() {
+  getCards().forEach((card) => {
+    card.classList.add("is-flipped");
+    card.setAttribute("aria-label", `${card.dataset.animal} card`);
+  });
+}
+
+function hideAllCards() {
+  getCards().forEach((card) => {
+    card.classList.remove("is-flipped");
+    card.setAttribute("aria-label", "Hidden animal card");
+  });
+}
+
+function endPreview() {
+  clearPreviewTimers();
+  previewing = false;
+  lockBoard = false;
+  boardEl.classList.remove("is-previewing");
+  previewBanner.classList.add("is-hidden");
+  hideAllCards();
+}
+
+function startPreview() {
+  const { previewSeconds } = MODES[selectedMode];
+  let remaining = previewSeconds;
+
+  clearPreviewTimers();
+  previewing = true;
+  lockBoard = true;
+  boardEl.classList.add("is-previewing");
+  previewBanner.classList.remove("is-hidden");
+  previewCount.textContent = String(remaining);
+  revealAllCards();
+
+  previewIntervalId = setInterval(() => {
+    remaining -= 1;
+    previewCount.textContent = String(Math.max(remaining, 0));
+    if (remaining <= 0) {
+      clearInterval(previewIntervalId);
+      previewIntervalId = null;
+    }
+  }, 1000);
+
+  previewTimeoutId = setTimeout(endPreview, previewSeconds * 1000);
+}
+
 function resetRoundState() {
   flipped = [];
   matchedCount = 0;
   moves = 0;
   lockBoard = false;
+  previewing = false;
   seconds = 0;
   started = false;
   stopTimer();
+  clearPreviewTimers();
+  boardEl.classList.remove("is-previewing");
+  previewBanner.classList.add("is-hidden");
   updateHud();
 }
 
@@ -149,16 +220,26 @@ function showSetup() {
   setupEl.classList.remove("is-hidden");
   winModal.classList.add("is-hidden");
   stopTimer();
+  clearPreviewTimers();
+  previewing = false;
+  boardEl.classList.remove("is-previewing");
+  previewBanner.classList.add("is-hidden");
 }
 
 function startGame() {
   resetRoundState();
   buildBoard();
   showPlay();
+  startPreview();
 }
 
 function onCardClick(card) {
-  if (lockBoard || card.classList.contains("is-flipped") || card.classList.contains("is-matched")) {
+  if (
+    previewing ||
+    lockBoard ||
+    card.classList.contains("is-flipped") ||
+    card.classList.contains("is-matched")
+  ) {
     return;
   }
 

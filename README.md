@@ -10,11 +10,11 @@ Or open `index.html` locally.
 
 ## Modes
 
-| Mode   | Pairs | Grid |
-|--------|-------|------|
-| Easy   | 6     | 3×4  |
-| Medium | 8     | 4×4  |
-| Hard   | 12    | 4×6  |
+| Mode   | Pairs | Grid | Peek |
+|--------|-------|------|------|
+| Easy   | 6     | 3×4  | 8s   |
+| Medium | 8     | 4×4  | 4s   |
+| Hard   | 12    | 4×6  | 2s   |
 
 ## Assets
 

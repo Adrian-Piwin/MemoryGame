@@ -246,12 +246,32 @@ body {
   line-height: 1.1;
 }
 
+.preview-banner {
+  margin: 0 auto 0.85rem;
+  width: fit-content;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(255, 200, 87, 0.92);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 4px 0 rgba(196, 137, 16, 0.45);
+  animation: rise-in 0.3s ease both;
+}
+
+.preview-banner.is-hidden {
+  display: none;
+}
+
 .board {
   display: grid;
   gap: 0.65rem;
   width: min(720px, 100%);
   margin: 0 auto;
   perspective: 1000px;
+}
+
+.board.is-previewing {
+  pointer-events: none;
 }
 
 .board[data-cols="4"] {

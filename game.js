@@ -1,3 +1,5 @@
+const VERSION = "1.2.0";
+
 const ANIMALS = [
   "bear",
   "buffalo",
@@ -61,8 +63,12 @@ const winSummary = document.getElementById("win-summary");
 const previewBanner = document.getElementById("preview-banner");
 const previewCount = document.getElementById("preview-count");
 const muteBtn = document.getElementById("mute-btn");
+const muteBtnPlay = document.getElementById("mute-btn-play");
 const confettiCanvas = document.getElementById("confetti-canvas");
 const startBtn = document.getElementById("start-btn");
+const versionLabel = document.getElementById("version-label");
+
+if (versionLabel) versionLabel.textContent = `v${VERSION}`;
 
 const imageCache = new Map();
 let assetsReady = null;
@@ -146,10 +152,25 @@ const sfx = {
 };
 
 function updateMuteButton() {
-  if (!muteBtn) return;
-  muteBtn.setAttribute("aria-pressed", sfx.muted ? "true" : "false");
-  muteBtn.textContent = sfx.muted ? "Sound off" : "Sound on";
-  muteBtn.title = sfx.muted ? "Unmute sounds" : "Mute sounds";
+  const label = sfx.muted ? "Sound off" : "Sound on";
+  const pressed = sfx.muted ? "true" : "false";
+  const title = sfx.muted ? "Unmute sounds" : "Mute sounds";
+  [muteBtn, muteBtnPlay].forEach((btn) => {
+    if (!btn) return;
+    btn.setAttribute("aria-pressed", pressed);
+    btn.textContent = label;
+    btn.title = title;
+  });
+}
+
+function toggleMute() {
+  sfx.muted = !sfx.muted;
+  localStorage.setItem("animal-match-muted", sfx.muted ? "1" : "0");
+  updateMuteButton();
+  if (!sfx.muted) {
+    sfx.unlock();
+    sfx.flip();
+  }
 }
 
 /* ---------------- Confetti (single canvas — cheap) ---------------- */
@@ -383,9 +404,24 @@ function createCard(animal, index) {
   return button;
 }
 
-function boardRows() {
-  const cols = Number(boardEl.dataset.cols) || MODES[selectedMode].cols;
-  return Math.ceil(deck.length / cols) || 1;
+/** Pick cols/rows that maximize square card size for the current shell. */
+function bestGrid(total, availableW, availableH) {
+  let best = { cols: MODES[selectedMode].cols, rows: Math.ceil(total / MODES[selectedMode].cols), size: 0, gap: 6 };
+
+  for (let cols = 2; cols <= total; cols += 1) {
+    if (total % cols !== 0) continue;
+    const rows = total / cols;
+    const gap = Math.max(4, Math.min(14, Math.floor(Math.min(availableW / cols, availableH / rows) * 0.06)));
+    const size = Math.min(
+      (availableW - gap * (cols - 1)) / cols,
+      (availableH - gap * (rows - 1)) / rows
+    );
+    if (size > best.size) {
+      best = { cols, rows, size, gap };
+    }
+  }
+
+  return best;
 }
 
 function fitBoard() {
@@ -393,21 +429,19 @@ function fitBoard() {
     return;
   }
 
-  const cols = Number(boardEl.dataset.cols) || MODES[selectedMode].cols;
-  const rows = boardRows();
-  const availableW = boardShell.clientWidth;
-  const availableH = boardShell.clientHeight;
+  // Leave a little room for card drop-shadows so nothing forces page scroll
+  const availableW = Math.max(0, boardShell.clientWidth - 4);
+  const availableH = Math.max(0, boardShell.clientHeight - 10);
   if (availableW < 16 || availableH < 16) return;
 
-  const gap = Math.max(3, Math.min(10, Math.floor(Math.min(availableW, availableH) * 0.018)));
-  const sizeByWidth = (availableW - gap * (cols - 1)) / cols;
-  const sizeByHeight = (availableH - gap * (rows - 1)) / rows;
-  const size = Math.max(36, Math.floor(Math.min(sizeByWidth, sizeByHeight)));
+  const { cols, rows, size, gap } = bestGrid(deck.length, availableW, availableH);
+  const cardSize = Math.max(40, Math.floor(size));
 
+  boardEl.dataset.cols = String(cols);
   boardEl.style.setProperty("--cols", String(cols));
   boardEl.style.setProperty("--rows", String(rows));
   boardEl.style.setProperty("--board-gap", `${gap}px`);
-  boardEl.style.setProperty("--card-size", `${size}px`);
+  boardEl.style.setProperty("--card-size", `${cardSize}px`);
 }
 
 function scheduleFitBoard() {
@@ -415,6 +449,11 @@ function scheduleFitBoard() {
   fitRaf = requestAnimationFrame(() => {
     fitRaf = 0;
     fitBoard();
+    // Second pass after flex/chrome settles (banner, fonts, safe areas)
+    fitRaf = requestAnimationFrame(() => {
+      fitRaf = 0;
+      fitBoard();
+    });
   });
 }
 
@@ -641,15 +680,8 @@ document.getElementById("restart-btn").addEventListener("click", showSetup);
 document.getElementById("play-again-btn").addEventListener("click", startGame);
 document.getElementById("change-mode-btn").addEventListener("click", showSetup);
 
-muteBtn.addEventListener("click", () => {
-  sfx.muted = !sfx.muted;
-  localStorage.setItem("animal-match-muted", sfx.muted ? "1" : "0");
-  updateMuteButton();
-  if (!sfx.muted) {
-    sfx.unlock();
-    sfx.flip();
-  }
-});
+muteBtn?.addEventListener("click", toggleMute);
+muteBtnPlay?.addEventListener("click", toggleMute);
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !winModal.classList.contains("is-hidden")) {

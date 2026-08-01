@@ -20,10 +20,6 @@
     <div class="sky" aria-hidden="true"></div>
     <div class="meadow" aria-hidden="true"></div>
     <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
-    <button class="btn ghost sound-toggle" id="mute-btn" type="button" aria-pressed="false">
-      Sound on
-    </button>
-
     <main class="app">
       <header class="hero">
         <p class="eyebrow">Kenney Animal Pack</p>
@@ -47,7 +43,10 @@
             <span class="mode-meta">12 pairs · 2s peek</span>
           </button>
         </div>
-        <button class="btn primary" id="start-btn" type="button">Start game</button>
+        <div class="setup-actions">
+          <button class="btn primary" id="start-btn" type="button">Start game</button>
+          <button class="btn ghost" id="mute-btn" type="button" aria-pressed="false">Sound on</button>
+        </div>
       </section>
 
       <section class="play is-hidden" id="play" aria-live="polite">
@@ -65,6 +64,7 @@
             <span class="stat-value" id="pairs">0/0</span>
           </div>
           <button class="btn ghost" id="restart-btn" type="button">New game</button>
+          <button class="btn ghost" id="mute-btn-play" type="button" aria-pressed="false">Sound on</button>
         </div>
         <p class="preview-banner is-hidden" id="preview-banner" aria-live="polite">
           Memorize the animals… <span id="preview-count">0</span>s
@@ -86,6 +86,7 @@
       </div>
     </div>
 
+    <p class="version" id="version-label" aria-label="Version">v1.2.0</p>
     <footer class="credit">
       Animals by
       <a href="https://kenney.nl/assets/animal-pack-redux" target="_blank" rel="noopener"

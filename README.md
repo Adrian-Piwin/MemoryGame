@@ -1,5 +1,7 @@
 # Animal Match
 
+Version `1.2.0`
+
 A browser memory game built with [Kenney's Animal Pack Redux](https://kenney.nl/assets/animal-pack-redux) (CC0).
 
 ## Play
